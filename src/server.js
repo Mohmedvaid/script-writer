@@ -1,5 +1,5 @@
 // src/server.js
-import app from './src/app';
+import app from './app';
 import { PORT } from './config/app.config';
 
 // Start the server

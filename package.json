@@ -1,6 +1,16 @@
 {
+  "name": "scripter",
+  "version": "1.0.0",
+  "description": "A simple scripter API",
+  "main": "server.js",
+  "scripts": {
+    "start": "babel-node src/server.js",
+    "dev": "nodemon --delay 2s --exec babel-node src/server.js",
+    "lint": "eslint ."
+  },
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -12,6 +22,11 @@
     "winston": "^3.13.0"
   },
   "devDependencies": {
-    "eslint": "^9.1.1"
+    "@babel/cli": "^7.24.1",
+    "@babel/core": "^7.24.4",
+    "@babel/node": "^7.23.9",
+    "@babel/preset-env": "^7.24.4",
+    "eslint": "^9.1.1",
+    "nodemon": "^3.1.0"
   }
 }
