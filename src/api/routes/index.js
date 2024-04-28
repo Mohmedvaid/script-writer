@@ -1,6 +1,6 @@
 // src/routes/index.js
 import express from 'express';
-// import authRoutes from './auth.routes';
+import videoScript from './videoScript.routes';
 // import userRoutes from './user.routes';
 // import itemRoutes from './item.routes';
 // import orderRoutes from './order.routes';
@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', (req, res) => res.json({ message: 'API is healthy' }));
 
 // // Mount auth routes at /auth
-// router.use('/auth', authRoutes);
+router.use('/video-script', videoScript);
 // router.use('/users', userRoutes);
 // router.use('/items', itemRoutes);
 // router.use('/orders', orderRoutes);
