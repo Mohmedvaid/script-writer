@@ -1,6 +1,7 @@
 import VideoScriptService from '../../services/VideoScript.service';
 import CustomError from '../../utils/CustomError';
 import isString from '../../utils/isString';
+import YouTubeService from '../../services/YouTube.service';
 
 /**
  * Controller to create video scripts based on user data
@@ -10,13 +11,20 @@ import isString from '../../utils/isString';
  */
 const generate = async (req, res, next) => {
   try {
-    // Initialize the service
-    const videoScriptService = new VideoScriptService();
-
     // Get user data from the request body
-    const { content } = req.body;
+    const { videoLink, content } = req.body;
     if (!content) throw new CustomError('Content is required to generate a script', 400);
     if (!isString(content)) throw new CustomError('Content must be a string', 400);
+
+    if (!videoLink) throw new CustomError('Video link is required to generate a script', 400);
+    if (!isString(videoLink)) throw new CustomError('Video link must be a string', 400);
+
+    // Initialize the service
+    const videoScriptService = new VideoScriptService();
+    const youtubeService = new YouTubeService();
+
+    const data = await youtubeService.extractCaptions(videoLink);
+    console.log({ data });
 
     // Use the service to generate a video script
     const script = await videoScriptService.generateVideoScript(content);
