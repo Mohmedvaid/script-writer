@@ -68,8 +68,8 @@ class YouTubeService {
       }
       const downloadedCaption = await this.youtube.captions.download({
         id: caption.id,
-        tfmt: 'txt'
-        // key: this.apiKey
+        tfmt: 'sbv',
+        lang: caption.snippet.language
       });
       console.log(downloadedCaption.data);
 

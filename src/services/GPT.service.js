@@ -1,12 +1,15 @@
 // src/services/GPT.service.js
+import OpenAI from 'openai';
 import CustomError from '../utils/CustomError';
 
-/**
- * GPT service to handle prompt-based interactions with GPT
- */
 class GPTService {
+  constructor() {
+    // Initialize OpenAI API client
+    this.openAI = new OpenAI();
+  }
+
   /**
-   * Sends a prompt to GPT and returns the response
+   * Sends a prompt to GPT-3.5 Turbo and returns the response
    * @param {string} prompt - The text prompt for GPT
    * @returns {Promise<string>} - The GPT-generated response
    * @throws {CustomError} - If an error occurs during GPT interaction
@@ -17,11 +20,21 @@ class GPTService {
     }
 
     try {
-      // Example GPT interaction (replace with actual GPT logic)
-      const gptResponse = `Response for prompt: ${prompt}`;
-      return gptResponse;
+      // Construct the GPT-3.5 Turbo request
+      const response = await this.openAI.chat.completions.create({
+        model: 'gpt-3.5-turbo', // Specify the GPT model
+        messages: [
+          {
+            role: 'user', // The role of the message
+            content: prompt // The user's prompt
+          }
+        ]
+      });
+      const results = response.choices[0].message.content;
+      console.log({ results });
+      return results;
     } catch (error) {
-      throw new CustomError('GPT interaction error', 500);
+      throw new CustomError(`GPT interaction error: ${error.message}`, 500);
     }
   }
 }
