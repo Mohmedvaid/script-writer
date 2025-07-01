@@ -1,3 +1,4 @@
+// services/outlineService.js
 const fs = require("fs");
 const path = require("path");
 const { OpenAI } = require("openai");

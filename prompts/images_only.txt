@@ -1,0 +1,15 @@
+You are continuing visual scene design for an established bedtime-history story.
+The avatar is already defined and will be used in these image cues.
+
+Generate exactly {{IMAGES_PER_CHAPTER}} image cues for this chapter:
+
+Format each as:
+#X SHORT TITLE (3–5 words)  
+Scene – What is happening.  
+Environment – Setting, weather, context.  
+Style – “medieval illuminated manuscript, tempera on parchment, flat outlined figures, no text”  
+Mood & Light – Palette, softness, dreamy tone.  
+Characters – Who is shown (use AVATAR if present).
+
+═══════════════ SCENE INPUT ═══════════════  
+{{CHAPTER_CONTENT}}
