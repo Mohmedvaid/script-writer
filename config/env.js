@@ -7,7 +7,6 @@ const REQUIRED_PROMPTS = [
   "outline.txt",
   "script.txt",
   "images_only.txt",
-  "avatar_and_images.txt",
 ];
 
 const ENV_VARS = {

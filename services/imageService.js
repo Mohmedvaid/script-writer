@@ -63,32 +63,24 @@ async function generateImage(prompt, outPath) {
 
 async function generateImagesFromOutline(outputDir) {
   const outlinePath = path.join(outputDir, "outline.txt");
+  const avatarPath = path.join(outputDir, "avatar.txt");
+
   if (!fs.existsSync(outlinePath)) {
     throw new Error(`Missing outline.txt at: ${outlinePath}`);
   }
+  if (!fs.existsSync(avatarPath)) {
+    throw new Error(`Missing avatar.txt at: ${avatarPath}`);
+  }
 
   const outlineText = fs.readFileSync(outlinePath, "utf-8");
+  const avatarText = fs.readFileSync(avatarPath, "utf-8");
   const chapters = extractChaptersFromOutline(outlineText);
 
-  const avatarPromptTemplate = fs.readFileSync(
-    path.join(promptsDir, "avatar.txt"),
-    "utf-8"
-  );
   const imagePromptTemplate = fs.readFileSync(
     path.join(promptsDir, "images_only.txt"),
     "utf-8"
   );
 
-  // STEP 1 – Avatar
-  console.log("🎭 Generating avatar...");
-  const avatarPrompt = interpolate(avatarPromptTemplate, {
-    OUTLINE: outlineText,
-  });
-  const avatarText = await callGPT(avatarPrompt);
-  fs.writeFileSync(path.join(outputDir, "avatar.txt"), avatarText);
-  console.log("✅ Avatar saved.");
-
-  // STEP 2 – Image cues + images
   const imgRoot = path.join(outputDir, "images");
   const genRoot = path.join(imgRoot, "generated");
   fs.mkdirSync(genRoot, { recursive: true });
@@ -114,8 +106,9 @@ async function generateImagesFromOutline(outputDir) {
     const cueMatches = [
       ...content.matchAll(/^#\d+\s+(.*?)\nScene\s*–\s*(.*?)$/gim),
     ];
+
     if (cueMatches.length === 0) {
-      console.warn(`⚠️ No cues found for chapter ${chapterNum}`);
+      console.warn(`⚠️ No image cues found for chapter ${chapterNum}`);
       continue;
     }
 
@@ -128,7 +121,17 @@ async function generateImagesFromOutline(outputDir) {
     for (let j = 0; j < cueMatches.length && j < IMAGES_PER_CHAPTER; j++) {
       const title = cueMatches[j][1].trim();
       const scene = cueMatches[j][2].trim();
-      const dallePrompt = `${title}. ${scene}. Style: medieval illuminated manuscript, parchment texture, flat outlined figures.`;
+
+      const dallePrompt = `
+      ${scene}
+      Setting: dreamlike medieval village or town.
+      Style: medieval illuminated manuscript, tempera on parchment, flat outlined figures, no shading, primitive perspective, 13th century art, no borders, no fake text.
+      Color: muted, soft pastels, faded tones.
+      Composition: horizontal 16:9, flat depth, visual balance.
+      Texture: painted on parchment, aged surface, rough ink lines.
+      Do not add frames, borders, or any caption text.
+      Character: ${avatarText.trim().split("\n").slice(0, 3).join(" ")}
+      `.trim();
 
       const outPath = path.join(chapterFolder, `image-${j + 1}.png`);
       console.log(`🎨 [Ch ${chapterNum}] Image ${j + 1}: ${title}`);
