@@ -5,6 +5,7 @@ const asyncMW2 = require("../middlewares/async");
 const { ScriptWriterSession } = require("../../core/script.service");
 const path = require("path");
 const fs = require("fs");
+const cfg = require("../../config/env");
 
 const router2 = express2.Router();
 
@@ -46,12 +47,12 @@ router2.post(
 
     const outline = fs.readFileSync(path.join(runDir, "outline.txt"), "utf-8");
     const writer = new ScriptWriterSession(outline, runDir, {
-      title,
-      mascotName,
+      title, // TODO:
+      mascotName, // TODO:
     });
 
     const chapters = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < cfg.CHAPTER_COUNT; i++) {
       chapters.push(await writer.generateNext());
     }
 

@@ -24,7 +24,7 @@ function load(name) {
 }
 
 function loadStyle(key = "default") {
-  return load(`image_styles/${key}`);
+  return load(`image_styles/${key}.txt`);
 }
 
 module.exports = { load, loadStyle };

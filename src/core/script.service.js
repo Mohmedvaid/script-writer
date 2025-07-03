@@ -8,22 +8,26 @@ const interpolate = require("../utils/interpolate");
 
 /* ────────────────────────────────────────────────────────── *
    ScriptWriterSession
-   – Streams 15 chapters sequentially, persisting each to disk.
+   – Streams N chapters sequentially, persists each under runDir/script/
 * ────────────────────────────────────────────────────────── */
 class ScriptWriterSession {
   /**
    * @param {string} outlineText         Raw outline text
-   * @param {string} runDir              Directory to save chapter files
-   * @param {object} [opts]              { title?, mascotName? }
+   * @param {string} runDir              Job directory created by outline service
+   * @param {object} [opts]              { title?: string, mascotName?: string }
    */
   constructor(outlineText, runDir, opts = {}) {
     if (!outlineText) throw new Error("Outline text is required.");
     if (!runDir) throw new Error("runDir is required.");
 
     this.runDir = runDir;
+    this.scriptDir = path.join(runDir, "script");
     this.chapter = 1;
 
-    /* fill all placeholders in prompts/script.txt */
+    /* create /script folder inside the run */
+    ensureDir(this.scriptDir);
+
+    /* fill placeholders in prompts/script.txt */
     const systemPrompt = interpolate(prompts.load("script"), {
       OUTLINE: outlineText.trim(),
       TITLE: opts.title || "",
@@ -34,10 +38,9 @@ class ScriptWriterSession {
       { role: "system", content: systemPrompt },
       { role: "user", content: "Start with Chapter 1." },
     ];
-
-    ensureDir(this.runDir);
   }
 
+  /** Generate the current chapter, persist to /script, then advance pointer */
   async generateNext() {
     if (this.chapter > cfg.CHAPTER_COUNT)
       throw new Error("All chapters generated.");
@@ -56,7 +59,7 @@ class ScriptWriterSession {
       throw new Error("Chapter content missing terminator.");
 
     const fileName = `chapter-${String(this.chapter).padStart(2, "0")}.txt`;
-    write(path.join(this.runDir, fileName), content);
+    write(path.join(this.scriptDir, fileName), content);
 
     this.history.push({ role: "assistant", content });
     this.history.push({ role: "user", content: "Next" });
@@ -68,6 +71,5 @@ class ScriptWriterSession {
     return cfg.CHAPTER_COUNT - this.chapter + 1;
   }
 }
-
 
 module.exports = { ScriptWriterSession };

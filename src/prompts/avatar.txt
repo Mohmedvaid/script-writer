@@ -1,0 +1,16 @@
+You are designing the single recurring avatar for a whimsical bedtime-history video.
+
+INPUT OUTLINE
+{{OUTLINE}}
+
+Task  
+• From the tone, era cues, and recurring mascot rules above, create one concise avatar spec (4-6 lines).
+
+Format exactly:  
+Name – a short, era-appropriate nickname  
+Look – clothing, notable colour accents, height, build, species if non-human  
+Face – facial features & expression style  
+Props – one or two signature items the artist must include  
+Palette – 2-3 key colours from historical pigments
+
+Return nothing else.

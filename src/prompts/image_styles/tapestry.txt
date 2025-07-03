@@ -1,0 +1,22 @@
+{{SCENE}}
+
+Medium & Era  
+• 14th-century illuminated-manuscript panel, tempera and ink on vellum with subtle gold-leaf accents.
+
+Subject  
+• Include {{AVATAR_SNIPPET}} plus any other figures or objects mentioned above, arranged in one calm tableau.
+
+Visual Style  
+• Flat, stylised bodies; primitive perspective; minimal shading.  
+• Bold black ink outlines around all forms.  
+• Mineral-pigment palette: ultramarine, verdigris, red lake, yellow ochre—slightly faded.  
+• Parchment background with gentle age mottling.  
+• **No frames, borders, text, UI, or modern artefacts.**  
+• Horizontal 16 : 9 layout, balanced and uncluttered to maintain a restful tone.  
+• Expressions serene or gently humorous; strictly PG-13.
+
+Lighting  
+• Soft, even scriptorium glow—no harsh shadows, no dramatic chiaroscuro.
+
+Output  
+• A single finished panel that looks freshly scanned from a medieval codex.

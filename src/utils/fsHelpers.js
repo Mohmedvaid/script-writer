@@ -4,17 +4,18 @@
  * Throws if fewer found.
  */
 function extractChapters(outline, count) {
-  const matches = [
-    ...outline.matchAll(
-      /^CHAPTER\\s+\\d+\\s+–[\\s\\S]+?(?=^CHAPTER\\s+\\d+\\s+–|$)/gm
-    ),
-  ];
+  const chapterRegex =
+    /^ *\*? *CHAPTER\s+\d+\s+[-–—][\s\S]+?(?=^ *\*? *CHAPTER\s+\d+\s+[-–—]|$)/gim;
+
+  const matches = [...outline.matchAll(chapterRegex)];
+
   if (matches.length < count) {
     throw new Error(
       `Expected ${count} chapters but found ${matches.length}. Check outline format.`
     );
   }
+
   return matches.slice(0, count).map((m) => m[0].trim());
 }
-
 module.exports = { extractChapters };
+

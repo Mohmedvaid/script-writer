@@ -1,0 +1,28 @@
+You are continuing visual-scene design for a bedtime-history video.
+
+INPUT
+{{CHAPTER_CONTENT}}
+
+TASK
+Generate exactly {{IMAGES_PER_CHAPTER}} image-cues for THIS chapter only.
+
+FORMAT — MUST MATCH **exactly** (no blank lines, bullets, or extra fields):
+
+#1 SHORT TITLE (3–5 words)
+Scene – one calm, present-tense sentence describing what the viewer sees.
+
+#2 SHORT TITLE (3–5 words)
+Scene – …
+
+#3 SHORT TITLE (3–5 words)
+Scene – …
+
+RULES
+• Titles: capitalise major words; no ending punctuation.  
+• Scene line: start with “Scene – ” (en-dash U+2013); ~15–25 words.  
+• Mention the main avatar briefly when relevant.  
+• Keep tone whimsical, PG-13, low stakes.  
+• NO additional headings, bullets, numbering styles, or markdown.  
+• Do NOT wrap text; each cue block is two lines exactly.
+
+Return nothing except the {{IMAGES_PER_CHAPTER}} cue blocks in that format.
