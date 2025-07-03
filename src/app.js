@@ -30,12 +30,12 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/", (_req, res) => res.render("index", { title: "" }));
 
-// ── last: error handler
-app.use(errorMW);
-
 //TODO:  not sure if this right spot for this
 app.use("/api", outlineRoutes);
 app.use("/api", scriptRoutes);
 app.use("/api", imageRoutes);
+
+// ── last: error handler
+app.use(errorMW);
 
 module.exports = app;
