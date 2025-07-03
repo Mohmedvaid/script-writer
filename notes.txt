@@ -1,0 +1,2 @@
+chat: 
+https://chatgpt.com/c/68646315-cf2c-8011-b0e5-45a65da031b4?model=o3

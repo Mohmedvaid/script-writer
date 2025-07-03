@@ -1,9 +1,0 @@
-{{SCENE}}
-
-Setting: dreamlike medieval village or town.  
-Style: medieval illuminated manuscript, tempera on parchment, flat outlined figures, no shading, primitive perspective, 13th century art, no borders, no fake text.  
-Color: muted, soft pastels, faded tones.  
-Composition: horizontal 16:9, flat depth, visual balance.  
-Texture: painted on parchment, aged surface, rough ink lines.  
-Do not add frames, borders, or any caption text.  
-Character: {{AVATAR_SNIPPET}}
