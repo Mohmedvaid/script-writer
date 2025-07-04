@@ -14,7 +14,7 @@ class ScriptWriterSession {
   /**
    * @param {string} outlineText         Raw outline text
    * @param {string} runDir              Job directory created by outline service
-   * @param {object} [opts]              { title?: string, mascotName?: string }
+   * @param {object} [opts]              { title?: string }
    */
   constructor(outlineText, runDir, opts = {}) {
     if (!outlineText) throw new Error("Outline text is required.");
@@ -31,7 +31,6 @@ class ScriptWriterSession {
     const systemPrompt = interpolate(prompts.load("script"), {
       OUTLINE: outlineText.trim(),
       TITLE: opts.title || "",
-      MASCOT: opts.mascotName || "Reginald the possum",
     });
 
     this.history = [

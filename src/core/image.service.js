@@ -106,6 +106,8 @@ async function generateImages(outlinePath, styleKey = "default") {
       const buffer = await (await fetch(url)).arrayBuffer();
       const outImg = path.join(chapterDir, `image-${j + 1}.png`);
       fs.writeFileSync(outImg, Buffer.from(buffer));
+      // same the prompt used to generate this image
+      write(path.join(chapterDir, `image-${j + 1}.txt`), dallePrompt);
       console.log(`🎨  chapter ${num} → image ${j + 1}`);
     }
   }

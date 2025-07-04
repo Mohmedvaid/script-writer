@@ -19,15 +19,9 @@ router2.post(
     if (!req.body.title || typeof req.body.title !== "string") {
       return res.status(400).json({ error: "title required" });
     }
-    const { title, mascotName } = req.body;
+    const { title } = req.body;
     if (!title?.trim()) {
       return res.status(400).json({ error: "title required" });
-    }
-    if (mascotName && typeof mascotName !== "string") {
-      return res.status(400).json({ error: "mascotName must be a string" });
-    }
-    if (mascotName && !mascotName.trim()) {
-      return res.status(400).json({ error: "mascotName cannot be empty" });
     }
     // Validate runDir and outline.txt existence
     if (!req.body.runDir || typeof req.body.runDir !== "string") {
@@ -47,8 +41,7 @@ router2.post(
 
     const outline = fs.readFileSync(path.join(runDir, "outline.txt"), "utf-8");
     const writer = new ScriptWriterSession(outline, runDir, {
-      title, // TODO:
-      mascotName, // TODO:
+      title,
     });
 
     const chapters = [];

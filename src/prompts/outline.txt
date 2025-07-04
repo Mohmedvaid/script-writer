@@ -5,7 +5,7 @@ INPUT VARIABLES
 • VIDEO TITLE: "{{TITLE}}"
 • TOTAL LENGTH: ≈ 3 hours of narration (≈30 000 spoken words)
 • CHAPTER COUNT: 15 even chapters (2000 words each)
-• STARTING ERA MOOD: “Long-night blue twilight, drifting snow, distant horn over frozen fjord”
+• STARTING ERA MOOD: "{{MOOD}}"
 
 STYLE & AUDIENCE
 1. Second-person, calm-wry bedtime tone (“You wake to the clang of iron…”).
@@ -51,7 +51,6 @@ Progressive Relaxation – Overall sensory intensity should taper chapter-by-cha
 Predictable Rhythm – Maintain a gentle, metronomic cadence: short sentences tucked between longer, slower ones. Repetition signals safety and lulls the listener.
 Low-Stakes Stakes – Hardships are quirky, not threatening. The worst consequence is mild embarrassment or an odd fee—never real peril—so cortisol stays low.
 Pleasant Micro-Visuals – Sprinkle calming, cozy images (dim lamplight, warm bread aroma, muffled footfalls on sawdust) every 3–4 bullets to trigger relaxation responses.
-Recurring Friend – Reginald the rat becomes a friendly mascot; his surprise cameos deliver tiny dopamine hits that refresh attention without waking the audience.
 Vocalizable Phrasing – Write with smooth consonants, few tongue-twisters, and minimal plosives so TTS or voice-over sounds soft even at low volume.
 Algorithm-Friendly Pacing – Hook sentence <20 words (quick intro retention); chapter length consistent (viewer expectation); no hard “good-byes” that cue early exits.
 Imagination > Information – Facts optional. Prioritize whimsical, never-heard mini-laws and invented stats that feel possible but remain delightfully new.

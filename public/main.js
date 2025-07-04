@@ -7,7 +7,7 @@ document.getElementById("genForm").addEventListener("submit", async (e) => {
   document.getElementById("log").textContent = "";
   const form = new FormData(e.target);
   const title = form.get("title").trim();
-  const mascot = form.get("mascot").trim() || "Reginald the rat";
+  const mood = form.get("mood").trim();
 
   try {
     // 1) Outline
@@ -15,7 +15,7 @@ document.getElementById("genForm").addEventListener("submit", async (e) => {
     const outlineRes = await fetch("/api/outline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, mood }),
     }).then((r) => r.json());
 
     if (!outlineRes.runDir) throw new Error("outline API failed");
@@ -29,7 +29,6 @@ document.getElementById("genForm").addEventListener("submit", async (e) => {
       body: JSON.stringify({
         runDir: outlineRes.runDir,
         title,
-        mascotName: mascot,
       }),
     }).then((r) => r.json());
     log("✅ Script done.");

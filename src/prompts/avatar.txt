@@ -4,7 +4,7 @@ INPUT OUTLINE
 {{OUTLINE}}
 
 Task  
-• From the tone, era cues, and recurring mascot rules above, create one concise avatar spec (4-6 lines).
+• From the tone and era cuesrules above, create one human concise avatar spec (4-6 lines).
 
 Format exactly:  
 Name – a short, era-appropriate nickname  

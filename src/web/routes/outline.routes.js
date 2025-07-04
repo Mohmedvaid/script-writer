@@ -14,11 +14,21 @@ router.post(
     if (!req.body.title || typeof req.body.title !== "string")
       return res.status(400).json({ error: "title required" });
 
-    const { title } = req.body;
+    // adding mood
+    if (!req.body.mood || typeof req.body.mood !== "string")
+      return res.status(400).json({ error: "mood required" });
+
+    const { title, mood } = req.body;
+
     if (!title?.trim())
       return res.status(400).json({ error: "title required" });
 
-    const { outline, runDir } = await generateOutline(title.trim());
+    if (!mood?.trim()) return res.status(400).json({ error: "mood required" });
+
+    const { outline, runDir } = await generateOutline(
+      title.trim(),
+      mood.trim()
+    );
     res.json({ runDir, outline });
   })
 );

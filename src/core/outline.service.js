@@ -15,13 +15,17 @@ const interpolate = require("../utils/interpolate");
  */
 async function generateOutline(
   videoTitle,
+  mood = "you pick based on the video title",
   baseDir = path.join(__dirname, "../../outputs")
 ) {
   if (!videoTitle?.trim()) throw new Error("Video title is required.");
 
   /* ── 1. prepare prompt */
   const tpl = prompts.load("outline"); // promps/outline.txt
-  const systemPrompt = interpolate(tpl, { TITLE: videoTitle.trim() });
+  const systemPrompt = interpolate(tpl, {
+    TITLE: videoTitle.trim(),
+    MOOD: mood.trim(),
+  });
 
   /* ── 2. call LLM */
   console.log(`🧠 Outline | model: ${cfg.OUTLINE_MODEL}`);
