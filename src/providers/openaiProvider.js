@@ -1,4 +1,3 @@
-// src/providers/openaiProvider.js
 const { OpenAI } = require("openai");
 
 class OpenAIProvider {
@@ -12,10 +11,36 @@ class OpenAIProvider {
     return res.choices?.[0]?.message?.content?.trim() || "";
   }
 
-  /** image({ prompt, size, n, model }) → [url] */
+  /** image({ prompt, size, quality, n, model }) → [Buffer] or [url] */
   async image(opts) {
-    const res = await this.client.images.generate(opts);
-    return res.data?.map((d) => d.url) || [];
+    const {
+      model,
+      prompt,
+      size = "1024x1024",
+      quality = "auto",
+      n = 1,
+    } = opts;
+
+    const res = await this.client.images.generate({
+      model,
+      prompt,
+      size,
+      quality,
+      n,
+    });
+
+    // gpt-image-1 → base64 buffers
+    if (model === "gpt-image-1") {
+      return res.data
+        .map((d) => {
+          if (!d.b64_json) return null;
+          return Buffer.from(d.b64_json, "base64");
+        })
+        .filter(Boolean);
+    }
+
+    // default → image URLs
+    return res.data.map((d) => d.url).filter(Boolean);
   }
 }
 

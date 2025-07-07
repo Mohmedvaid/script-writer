@@ -1,3 +1,4 @@
+// File: src/web/routes/image.routes.js
 const express = require("express");
 const asyncMW = require("../middlewares/async");
 const { generateImages } = require("../../core/image.service");
