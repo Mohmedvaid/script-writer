@@ -1,48 +1,55 @@
 document.getElementById("genForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const log = (msg) => {
-    document.getElementById("log").textContent += msg + "\n";
-  };
-
+  const log = (m) =>
+    (document.getElementById("log").textContent += m + "\n");
   document.getElementById("log").textContent = "";
-  const form = new FormData(e.target);
-  const title = form.get("title").trim();
-  const mood = form.get("mood").trim();
+
+  const fd   = new FormData(e.target);
+  const body = {
+    title: fd.get("title")?.trim(),
+    mood:  fd.get("mood")?.trim() || undefined,   // blank → undefined
+    pov:   fd.get("pov"),                         // select defaults to second_person
+  };
+  const styleKey = fd.get("styleKey") || "tapestry";
 
   try {
-    // 1) Outline
+    /* 1 ── OUTLINE */
     log("➡️  Generating outline …");
     const outlineRes = await fetch("/api/outline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, mood }),
+      body: JSON.stringify(body),
     }).then((r) => r.json());
-
-    if (!outlineRes.runDir) throw new Error("outline API failed");
+    if (!outlineRes.runDir)
+      throw new Error(outlineRes.error || "outline API failed");
     log("✅ Outline ready — runDir: " + outlineRes.runDir);
 
-    // 2) Script
-    log("➡️  Generating script … (this takes several minutes)");
-    await fetch("/api/script", {
+    /* 2 ── SCRIPT */
+    log("➡️  Generating script … (a few minutes)");
+    const scriptRes = await fetch("/api/script", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         runDir: outlineRes.runDir,
-        title,
+        title:  body.title,
       }),
     }).then((r) => r.json());
+    if (!scriptRes.scriptPath)
+      throw new Error(scriptRes.error || "script API failed");
     log("✅ Script done.");
 
-    // 3) Images
+    /* 3 ── IMAGES */
     log("➡️  Generating images … (also slow)");
-    await fetch("/api/images", {
+    const imgRes = await fetch("/api/images", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         outlinePath: `${outlineRes.runDir}/outline.txt`,
-        styleKey: "tapestry",
+        styleKey,
       }),
     }).then((r) => r.json());
+    if (!imgRes.ok && imgRes.error)
+      throw new Error(imgRes.error || "images API failed");
     log("🎉 All assets generated — check outputs folder.");
   } catch (err) {
     console.error(err);

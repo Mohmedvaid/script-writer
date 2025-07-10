@@ -45,7 +45,7 @@ router2.post(
     });
 
     const chapters = [];
-    for (let i = 0; i < cfg.CHAPTER_COUNT; i++) {
+    for (let i = 0; i < cfg.SCRIPT_CHAPTER_COUNT; i++) {
       chapters.push(await writer.generateNext());
     }
 

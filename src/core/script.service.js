@@ -1,5 +1,6 @@
 // src/core/script.service.js
 const path = require("path");
+const fs = require("fs");
 const cfg = require("../config/env");
 const llm = require("../config/llm");
 const prompts = require("../infrastructure/promptLoader");
@@ -41,7 +42,7 @@ class ScriptWriterSession {
 
   /** Generate the current chapter, persist to /script, then advance pointer */
   async generateNext() {
-    if (this.chapter > cfg.CHAPTER_COUNT)
+    if (this.chapter > cfg.SCRIPT_CHAPTER_COUNT)
       throw new Error("All chapters generated.");
 
     const modelName = cfg.SCRIPT_MODEL || cfg.OUTLINE_MODEL;
@@ -58,7 +59,12 @@ class ScriptWriterSession {
       throw new Error("Chapter content missing terminator.");
 
     const fileName = `chapter-${String(this.chapter).padStart(2, "0")}.txt`;
-    write(path.join(this.scriptDir, fileName), content);
+    const filePath = path.join(this.scriptDir, fileName);
+    write(filePath, content);
+
+    // Append to master file with only a line break
+    const masterFilePath = path.join(this.scriptDir, "all-chapters.txt");
+    fs.appendFileSync(masterFilePath, content + "\n\n");
 
     this.history.push({ role: "assistant", content });
     this.history.push({ role: "user", content: "Next" });
@@ -67,7 +73,7 @@ class ScriptWriterSession {
   }
 
   chaptersRemaining() {
-    return cfg.CHAPTER_COUNT - this.chapter + 1;
+    return cfg.SCRIPT_CHAPTER_COUNT - this.chapter + 1;
   }
 }
 

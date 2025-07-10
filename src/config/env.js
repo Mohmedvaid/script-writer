@@ -14,6 +14,7 @@ const schema = joi
     /* model-agnostic */
     IMAGES_PER_CHAPTER: joi.number().integer().default(3),
     CHAPTER_COUNT: joi.number().integer().default(15),
+    SCRIPT_CHAPTER_COUNT: joi.number().integer().default(10),
     LLM_PROVIDER: joi.string().valid("openai", "gemini").default("openai"),
 
     /* OpenAI */

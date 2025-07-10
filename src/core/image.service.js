@@ -74,10 +74,27 @@ async function generateImages(outlinePath, styleKey = "default") {
     );
     write(cueFile, cues);
 
-    const matches = [...cues.matchAll(/^#\d+\s+(.*?)\nScene\s*–\s*(.*?)$/gim)];
+    /* ── new block-based cue parser */
+    const lines = cues.split("\n").map(line => line.trim()).filter(Boolean);
+    const matches = [];
+    for (let k = 0; k < lines.length - 1; k++) {
+      const titleLine = lines[k];
+      const sceneLine = lines[k + 1];
+
+      if (
+        /^#\d+\s+.+/.test(titleLine) &&
+        /^Scene\s*[-–—:]\s+.+/.test(sceneLine)
+      ) {
+        matches.push([titleLine, sceneLine]);
+        k++; // skip the scene line
+      }
+    }
+
     if (!matches.length) {
-      console.warn(`⚠️ No cues parsed for chapter ${num}`);
-      continue;
+      const errSnippet = cues.slice(0, 1000).replace(/\n/g, "\\n");
+      throw new Error(
+        `❌ Chapter ${num}: No cues parsed.\nReason: Expected "#n Title" followed by "Scene – ..."\nCue text:\n${errSnippet}`
+      );
     }
 
     const chapterDir = path.join(
@@ -87,7 +104,7 @@ async function generateImages(outlinePath, styleKey = "default") {
     ensureDir(chapterDir);
 
     for (let j = 0; j < matches.length && j < cfg.IMAGES_PER_CHAPTER; j++) {
-      const scene = matches[j][2].trim();
+      const scene = matches[j][1].trim();
 
       const finalPrompt = interpolate(styleTemplate, {
         SCENE: scene,
@@ -102,8 +119,8 @@ async function generateImages(outlinePath, styleKey = "default") {
           cfg.IMAGE_SIZE === "landscape"
             ? "1536x1024"
             : cfg.IMAGE_SIZE === "portrait"
-            ? "1024x1536"
-            : "1024x1024",
+              ? "1024x1536"
+              : "1024x1024",
         quality: cfg.IMAGE_QUALITY,
       });
 
@@ -115,7 +132,6 @@ async function generateImages(outlinePath, styleKey = "default") {
 
       const outImg = path.join(chapterDir, `image-${j + 1}.png`);
       fs.writeFileSync(outImg, buffer);
-      // write(path.join(chapterDir, `image-${j + 1}.txt`), finalPrompt);
 
       const allDir = path.join(imgRoot, "all");
       ensureDir(allDir);

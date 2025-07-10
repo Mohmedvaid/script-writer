@@ -50,15 +50,31 @@
 
   <form id="genForm">
     <label>Video title
-      <input name="title" required placeholder="e.g. Mid‑Winter Troll Taxes" value="Mid-Winter Troll Taxes" />
+      <input name="title" required placeholder="e.g. Mid-Winter Troll Taxes" />
     </label>
 
     <label>Mood
-      <input name="mood" placeholder="e.g. Candlelight over wet cobblestones" value="You pick the mood" />
+      <input name="mood" placeholder="leave blank to auto-pick" />
+    </label>
+
+    <label>POV
+      <select name="pov">
+        <option value="second_person" selected>Second-person</option>
+        <option value="first_person">First-person</option>
+      </select>
+    </label>
+
+    <label>Image style
+      <select name="styleKey">
+        <option value="tapestry" selected>Tapestry</option>
+        <option value="manuscript">Manuscript</option>
+        <option value="etching">Etching</option>
+      </select>
     </label>
 
     <button type="submit">Generate</button>
   </form>
+
 
   <pre id="log"></pre>
 </body>

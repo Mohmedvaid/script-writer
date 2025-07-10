@@ -25,4 +25,9 @@ RULES
 • NO additional headings, bullets, numbering styles, or markdown.  
 • Do NOT wrap text; each cue block is two lines exactly.
 
+HARD SAFETY RULES (MUST FOLLOW)  
+• Do NOT mention anything romantic, violent, medical, suggestive, bodily, or unsafe.  
+• Avoid words like “kiss,” “confess,” “wound,” “blood,” “princess,” “nude,” or “death.”  
+• These cues must be safe for children, educational settings, and bedtime listeners.
+
 Return nothing except the {{IMAGES_PER_CHAPTER}} cue blocks in that format.

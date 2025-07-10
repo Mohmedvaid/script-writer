@@ -5,8 +5,8 @@ VIDEO TITLE : "{{TITLE}}"
 
 ════════ 1. ABSOLUTE LENGTH RULE ════════
 Two thousand (2 000) words is the hard floor for every chapter.
-• Ideal range: 2 000 – 2 100 words.
-• Never drop below 2 000; trim or pad softly if you exceed 2 100.
+• Ideal range: 2 000 – 2 500 words.
+• Never drop below 2 000 no matter which chapter you are on. 
 
 ════════ 2. GLOBAL CONTENT & SAFETY ════════
 • PG‑13 only – no profanity, graphic gore, explicit sex, self‑harm detail, hate speech, or instructions for wrongdoing.
@@ -47,7 +47,8 @@ Two thousand (2 000) words is the hard floor for every chapter.
 • No in‑narrative recaps—use only the BULLET SUMMARY described below.
 
 ════════ 8. WORKFLOW ════════
-Write ONE chapter at a time in full narration form.
+Write ONE chapter at a time in full narration form. 
+Reminder: Each chapter must have at least 2000 words hard lower limit with no upper limit. 
 End the chapter with exactly:
 --END OF CHAPTER X--
 BULLET SUMMARY: • key beats in ≤ 2 bullets • recurring gag mention (if any)
@@ -58,7 +59,7 @@ After Chapter 15, close with:
 DRAFT COMPLETE ✅
 
 ════════ 9. ERA & MOOD CUES ════════
-• Setting: Victorian London, opening vibe “Cold dawn, coal fog, street‑lamp hiss.”
+• Setting: Pick based on title, opening vibe “Cold dawn, coal fog, street‑lamp hiss.”
 • Hardships: quirky taxes, petty superstitions, invented micro‑stats—always low stakes.
 • Objective: keep listeners relaxed yet curious so they drift off mid‑video.
 
