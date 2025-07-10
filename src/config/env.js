@@ -5,33 +5,49 @@ const joi = require("joi");
 /** ──────────────── schema ──────────────── */
 const schema = joi
   .object({
+    // ── runtime ──
     NODE_ENV: joi
       .string()
       .valid("development", "production")
-      .default("development"),
-    PORT: joi.number().integer().default(3000),
+      .required(),
 
-    /* model-agnostic */
-    IMAGES_PER_CHAPTER: joi.number().integer().default(3),
-    CHAPTER_COUNT: joi.number().integer().default(15),
-    SCRIPT_CHAPTER_COUNT: joi.number().integer().default(10),
-    LLM_PROVIDER: joi.string().valid("openai", "gemini").default("openai"),
+    PORT: joi.number().integer().required(),
 
-    /* OpenAI */
+    // ── provider & auth ──
+    LLM_PROVIDER: joi.string().valid("openai", "gemini").required(),
+
     OPENAI_API_KEY: joi
       .string()
-      .allow("")
+      .min(10)
       .when("LLM_PROVIDER", {
         is: "openai",
-        then: joi.string().min(10).required().messages({
+        then: joi.required().messages({
           "any.required": "OPENAI_API_KEY is required when LLM_PROVIDER=openai",
         }),
       }),
 
-    /* Gemini etc. (placeholder) */
-    GEMINI_API_KEY: joi.string().allow(""),
+    GEMINI_API_KEY: joi
+      .string()
+      .allow("")
+      .when("LLM_PROVIDER", { is: "gemini", then: joi.required() }),
+
+    // ── model choices ──
+    OUTLINE_MODEL: joi.string().required(),
+    SETTING_MODEL: joi.string().required(),
+    SCRIPT_MODEL: joi.string().required(),
+    SCRIPT_MAX_TOKENS: joi.number().integer().min(500).required(),
+
+    IMAGE_MODEL: joi.string().required(),
+    IMAGE_TEXT_MODEL: joi.string().required(),
+    IMAGE_QUALITY: joi.string().valid("low", "standard", "hd", "auto").required(),
+    IMAGE_SIZE: joi.string().valid("landscape", "square", "portrait").required(),
+
+    // ── generation counts ──
+    IMAGES_PER_CHAPTER: joi.number().integer().min(1).required(),
+    CHAPTER_COUNT: joi.number().integer().min(1).required(),
+    SCRIPT_CHAPTER_COUNT: joi.number().integer().min(1).required(),
   })
-  .unknown(true); // leave room for odd CI vars
+  .unknown(true); // allow extra vars for CI or deployment tools
 
 /** ──────────────── parse ──────────────── */
 const { value: env, error } = schema.validate(process.env, {
@@ -47,7 +63,7 @@ if (error) {
 
 /** exposed config object  */
 module.exports = {
-  ...env, // raw vals
+  ...env,
   isDev: env.NODE_ENV === "development",
   isProd: env.NODE_ENV === "production",
 };

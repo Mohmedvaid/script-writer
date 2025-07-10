@@ -45,13 +45,17 @@ class ScriptWriterSession {
     if (this.chapter > cfg.SCRIPT_CHAPTER_COUNT)
       throw new Error("All chapters generated.");
 
-    const modelName = cfg.SCRIPT_MODEL || cfg.OUTLINE_MODEL;
+    const modelName = cfg.SCRIPT_MODEL;
+    if (!modelName) {
+      throw new Error("No model configured for script generation.");
+    }
     console.log(`✍️  Generating Chapter ${this.chapter} using ${modelName}`);
 
     const content = await llm.chat({
       model: modelName,
       temperature: 0.8,
       top_p: 0.95,
+      max_tokens: cfg.SCRIPT_MAX_TOKENS,
       messages: this.history,
     });
 

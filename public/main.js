@@ -34,7 +34,7 @@ document.getElementById("genForm").addEventListener("submit", async (e) => {
         title:  body.title,
       }),
     }).then((r) => r.json());
-    if (!scriptRes.scriptPath)
+    if (!scriptRes.chaptersWritten)
       throw new Error(scriptRes.error || "script API failed");
     log("✅ Script done.");
 
