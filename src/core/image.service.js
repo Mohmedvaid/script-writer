@@ -110,6 +110,8 @@ async function generateImages(outlinePath, styleKey = "default") {
         SCENE: scene,
         AVATAR_SNIPPET: avatarSnippet,
       });
+      // write final prompt to file
+      write(path.join(chapterDir, `prompt-${j + 1}.txt`), finalPrompt);
 
       const imageBuffers = await llm.image({
         model: cfg.IMAGE_MODEL,

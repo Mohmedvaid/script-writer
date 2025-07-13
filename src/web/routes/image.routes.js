@@ -13,8 +13,12 @@ router.post(
   asyncMW(async (req, res) => {
     const { outlinePath, styleKey = "tapestry" } = req.body;
 
-    if (!outlinePath || !fs.existsSync(outlinePath)) {
-      return res.status(400).json({ error: "outlinePath missing or invalid" });
+    if (!outlinePath) {
+      return res.status(400).json({ error: "outlinePath is required" });
+    }
+
+    if (!fs.existsSync(outlinePath)) {
+      return res.status(400).json({ error: "outlinePath invalid" });
     }
 
     /* validate style key early */
