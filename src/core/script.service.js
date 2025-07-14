@@ -32,7 +32,7 @@ class SegmentedScriptWriter {
     this.scriptDir   = path.join(runDir, "script");
     this.segmentIdx  = 1;
     this.charCount   = 0;
-    this.segmentCap  = Math.ceil(plan.targetScriptChars / plan.segmentChars);
+    this.segmentCap  = plan.chapterCount;
 
     ensureDir(this.scriptDir);
 

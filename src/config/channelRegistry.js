@@ -9,7 +9,7 @@ const registry = {
     promptPath: "boring_history",
     styles: ["tapestry", "etching"],
     povOptions: ["second_person", "first_person"],
-    targetScriptChars: 80_000,
+    targetScriptChars: 20_000,
     // segmentChars: 12_000,
     imagesPerChapter: 2,
   },
