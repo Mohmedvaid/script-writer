@@ -1,6 +1,7 @@
+// src/core/image.service.js
+
 const fs = require("fs");
 const path = require("path");
-
 const cfg = require("../config/env");
 const llm = require("../config/llm");
 const prompts = require("../infrastructure/promptLoader");
@@ -9,52 +10,60 @@ const { extractChapters } = require("../utils/fsHelpers");
 const interpolate = require("../utils/interpolate");
 
 /**
- * Generate avatar, cue sheets and GPT-Image-1 renders for every chapter.
- * @param {string} outlinePath – absolute path to outline.txt
- * @param {string} styleKey    – key in prompts/image_styles/ (default "default")
+ * @param {object} args { runDir: string, plan: object }
+ * plan is the same object returned by planBuilder
  */
-async function generateImages(outlinePath, styleKey = "default") {
+async function generateImages(plan) {
+  /* ── sanity checks ── */
+  const runDir = plan.runDir;
+  if (!runDir) throw new Error("runDir is required.");
+  const outlinePath = path.join(runDir, "outline.txt");
   if (!fs.existsSync(outlinePath))
-    throw new Error("outline.txt not found → " + outlinePath);
+    throw new Error("outline.txt not found in " + runDir);
 
-  const baseDir = path.dirname(outlinePath);
   const outlineText = fs.readFileSync(outlinePath, "utf-8");
-  const chapters = extractChapters(outlineText, cfg.CHAPTER_COUNT);
+  const chapters = extractChapters(outlineText, plan.chapterCount);
 
-  /* ── directories */
-  const imgRoot = path.join(baseDir, "images");
+  /* ── directories ── */
+  const imgRoot = path.join(runDir, "images");
   const genRoot = path.join(imgRoot, "generated");
   ensureDir(genRoot);
 
-  /* ── 1. Avatar */
-  const avatarPrompt = interpolate(prompts.load("avatar"), {
-    OUTLINE: outlineText,
-  });
-  console.log("🎭 Generating avatar …");
-  const avatarText = await llm.chat({
-    model: cfg.IMAGE_TEXT_MODEL,
-    temperature: 0.85,
-    top_p: 0.9,
-    messages: [
-      { role: "system", content: avatarPrompt },
-      { role: "user", content: "Proceed." },
-    ],
-  });
-  write(path.join(imgRoot, "avatar.txt"), avatarText);
+  /* ── 1. Avatar (if required) ── */
+  let avatarSnippet = "";
+  if (plan.avatarRequired) {
+    const avatarPrompt = interpolate(
+      prompts.load(path.join(plan.promptPath, "avatar.txt")),
+      { OUTLINE: outlineText }
+    );
+    console.log("🎭 Generating avatar …");
+    const avatarText = await llm.chat({
+      model: cfg.IMAGE_TEXT_MODEL,
+      temperature: 0.85,
+      top_p: 0.9,
+      messages: [
+        { role: "system", content: avatarPrompt },
+        { role: "user", content: "Proceed." },
+      ],
+    });
+    write(path.join(imgRoot, "avatar.txt"), avatarText);
+    avatarSnippet = avatarText.split("\n").slice(0, 3).join(" ");
+  }
 
-  /* ── static templates */
-  const cueTemplate = prompts.load("images_only");
-  const styleTemplate = prompts.loadStyle(styleKey);
-  const avatarSnippet = avatarText.split("\n").slice(0, 3).join(" ");
+  /* ── static templates ── */
+  const cueTemplate = prompts.load(
+    path.join(plan.promptPath, "images_only.txt")
+  );
+  const styleTemplate = prompts.loadStyle(plan.styleKey);
 
-  /* ── 2. Per‑chapter loops */
+  /* ── 2. Per‑chapter loop ── */
   for (let i = 0; i < chapters.length; i++) {
     const num = i + 1;
-    const chapterTxt = chapters[i];
+    const chap = chapters[i];
 
     const cuePrompt = interpolate(cueTemplate, {
-      CHAPTER_CONTENT: chapterTxt,
-      IMAGES_PER_CHAPTER: cfg.IMAGES_PER_CHAPTER,
+      CHAPTER_CONTENT: chap,
+      IMAGES_PER_CHAPTER: plan.imagesPerChapter,
     });
 
     console.log(`🧠 Cues for Chapter ${num} …`);
@@ -68,34 +77,24 @@ async function generateImages(outlinePath, styleKey = "default") {
       ],
     });
 
-    const cueFile = path.join(
-      imgRoot,
-      `chapter-${String(num).padStart(2, "0")}-cues.txt`
+    write(
+      path.join(imgRoot, `chapter-${String(num).padStart(2, "0")}-cues.txt`),
+      cues
     );
-    write(cueFile, cues);
 
-    /* ── new block-based cue parser */
-    const lines = cues.split("\n").map(line => line.trim()).filter(Boolean);
-    const matches = [];
+    /* quick two‑line cue parser */
+    const lines = cues
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    const scenes = [];
     for (let k = 0; k < lines.length - 1; k++) {
-      const titleLine = lines[k];
-      const sceneLine = lines[k + 1];
-
-      if (
-        /^#\d+\s+.+/.test(titleLine) &&
-        /^Scene\s*[-–—:]\s+.+/.test(sceneLine)
-      ) {
-        matches.push([titleLine, sceneLine]);
-        k++; // skip the scene line
+      if (/^#\d+\s/.test(lines[k]) && /^Scene\s[–-]/.test(lines[k + 1])) {
+        scenes.push(lines[k + 1].replace(/^Scene\s[–-]\s*/, ""));
+        k++;
       }
     }
-
-    if (!matches.length) {
-      const errSnippet = cues.slice(0, 1000).replace(/\n/g, "\\n");
-      throw new Error(
-        `❌ Chapter ${num}: No cues parsed.\nReason: Expected "#n Title" followed by "Scene – ..."\nCue text:\n${errSnippet}`
-      );
-    }
+    if (!scenes.length) throw new Error(`No cues parsed for chapter ${num}`);
 
     const chapterDir = path.join(
       genRoot,
@@ -103,49 +102,41 @@ async function generateImages(outlinePath, styleKey = "default") {
     );
     ensureDir(chapterDir);
 
-    for (let j = 0; j < matches.length && j < cfg.IMAGES_PER_CHAPTER; j++) {
-      const scene = matches[j][1].trim();
-
+    for (let j = 0; j < scenes.length && j < plan.imagesPerChapter; j++) {
       const finalPrompt = interpolate(styleTemplate, {
-        SCENE: scene,
+        SCENE: scenes[j],
         AVATAR_SNIPPET: avatarSnippet,
       });
-      // write final prompt to file
       write(path.join(chapterDir, `prompt-${j + 1}.txt`), finalPrompt);
 
-      const imageBuffers = await llm.image({
+      const imgs = await llm.image({
         model: cfg.IMAGE_MODEL,
         prompt: finalPrompt,
         n: 1,
-        size:
-          cfg.IMAGE_SIZE === "landscape"
-            ? "1536x1024"
-            : cfg.IMAGE_SIZE === "portrait"
-              ? "1024x1536"
-              : "1024x1024",
+        size: plan.imageSize || "1024x1024",
         quality: cfg.IMAGE_QUALITY,
       });
+      const buf = imgs?.[0];
+      if (!buf) continue;
 
-      const buffer = imageBuffers?.[0];
-      if (!buffer) {
-        console.warn(`❌ No image returned for chapter ${num}, image ${j + 1}`);
-        continue;
-      }
+      const outPath = path.join(chapterDir, `image-${j + 1}.png`);
+      fs.writeFileSync(outPath, buf);
 
-      const outImg = path.join(chapterDir, `image-${j + 1}.png`);
-      fs.writeFileSync(outImg, buffer);
+      ensureDir(path.join(imgRoot, "all"));
+      fs.copyFileSync(
+        outPath,
+        path.join(imgRoot, "all", `chapter-${num}-image-${j + 1}.png`)
+      );
 
-      const allDir = path.join(imgRoot, "all");
-      ensureDir(allDir);
-
-      const allImg = path.join(allDir, `chapter-${num}-image-${j + 1}.png`);
-      fs.copyFileSync(outImg, allImg);
-
-      console.log(`🎨  chapter ${num} → image ${j + 1}`);
+      console.log(`🎨 Chapter ${num} → image ${j + 1}`);
     }
   }
 
   console.log("🎉 All images generated.");
+  return {
+    imagesDir: "images/all",
+    imagesGenerated: plan.chapterCount * plan.imagesPerChapter,
+  };
 }
 
 module.exports = { generateImages };

@@ -22,7 +22,8 @@ function buildPlan({ title, pov, channel, styleKey }) {
 
   const target = reg.targetScriptChars;
   const segmentChars = Math.min(target, FIXED_SEGMENT_CHARS);
-  const chapterCount = Math.ceil(target / segmentChars);   // outline = segments
+  const chapterCount = Math.ceil(target / segmentChars);
+  const runDir = createRunDir(path.join(__dirname, "../../outputs"));
 
   const plan = {
     channel,
@@ -35,13 +36,14 @@ function buildPlan({ title, pov, channel, styleKey }) {
     imagesPerChapter: reg.imagesPerChapter,
     avatarRequired: reg.avatarRequired,
     promptPath: reg.promptPath,
+    imageSize: reg.imageSize,
+    runDir,
     createdAt: new Date().toISOString(),
   };
 
-  const runDir = createRunDir(path.join(__dirname, "../../outputs"));
   write(path.join(runDir, "plan.json"), JSON.stringify(plan, null, 2));
 
-  return { runDir, plan };
+  return plan;
 }
 
 module.exports = { buildPlan };

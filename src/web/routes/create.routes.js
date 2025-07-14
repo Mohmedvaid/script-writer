@@ -3,10 +3,10 @@ const express = require("express");
 const z = require("zod");
 const asyncMW = require("../middlewares/async");
 
-const { buildPlan } = require("../../core/runPlan.service");
+const { buildPlan } = require("../../core/planBuilder.service");
 const { generateOutline } = require("../../core/outline.service");
 const { writeFullScript } = require("../../core/script.service");
-// const { generateImages }  = require("../../core/image.service");
+const { generateImages } = require("../../core/image.service");
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ const BodySchema = z.object({
   title: z.string().trim().min(5),
   channel: z.string().trim().min(1),
   styleKey: z.string().trim().min(1),
-  pov: z.string().trim().min(1)
+  pov: z.string().trim().min(1),
 });
 
 router.post(
@@ -26,31 +26,31 @@ router.post(
     if (!parsed.success)
       return res.status(400).json({ error: parsed.error.issues[0].message });
 
-    /* 2️⃣ build plan.json + runDir (throws if invalid) */
     console.log("Generating plan...");
-    const { runDir, plan } = buildPlan(parsed.data);
+    const plan = buildPlan(parsed.data);
+    const runDir = plan.runDir;
 
-    /* 3️⃣ outline */
+    console.log("Plan built successfully:", plan);
+
     console.log("Generating outline...");
-    await generateOutline({ ...plan, runDir });
-    console.log("Outline generated and saved.");
+    await generateOutline(plan);
 
-    /* 4️⃣ script */
+    console.log("Writing full script...");
     const scriptInfo = await writeFullScript(runDir);
 
-    /* 5️⃣ images */
-    // const imagesInfo = await generateImages(runDir); // reads plan.json internally
+    console.log("Generating images...");
+    const imagesInfo = await generateImages(plan);
 
-    /* 6️⃣ done – respond */
-    res.json({
+    console.log("All tasks completed successfully!");
+    return res.json({
       status: "complete",
       runDir,
       outlineFile: "outline.txt",
       scriptFile: scriptInfo.scriptFile,
       charsWritten: scriptInfo.charsWritten,
       segments: scriptInfo.segments,
-      // imagesDir: imagesInfo.imagesDir,
-      // imagesGenerated: imagesInfo.imagesGenerated,
+      imagesDir: imagesInfo.imagesDir,
+      imagesGenerated: imagesInfo.imagesGenerated,
       plan,
     });
   })

@@ -1,3 +1,4 @@
+// src/core/outline.service.js
 const path = require("path");
 const cfg = require("../config/env");
 const llm = require("../config/llm");
@@ -7,19 +8,25 @@ const interpolate = require("../utils/interpolate");
 const { buildContext } = require("../services/contextBuilder");
 const channelRegistry = require("../config/channelRegistry");
 
-const banned = [/yawning tariff/i, /troll[- ]?inspector/i, /frozen beard[- ]?tax/i, /fermented[- ]?shark/i];
+const banned = [
+  /yawning tariff/i,
+  /troll[- ]?inspector/i,
+  /frozen beard[- ]?tax/i,
+  /fermented[- ]?shark/i,
+];
 
 async function generateOutline({
   title,
   pov,
   channel,
-  // baseDir = path.join(__dirname, "../../outputs"),
   runDir,
   maxRetries = 1,
-  chapterCount
+  chapterCount,
 }) {
   if (!title || !pov || !channel) {
-    throw new Error("Title, POV, and channel are required for outline generation.");
+    throw new Error(
+      "Title, POV, and channel are required for outline generation."
+    );
   }
 
   if (!chapterCount) {
@@ -42,7 +49,8 @@ async function generateOutline({
   });
 
   // ── B. call model with retry -----------------------------------------------
-  let outline, attempts = 0;
+  let outline,
+    attempts = 0;
   do {
     outline = await llm.chat({
       model: cfg.OUTLINE_MODEL,
@@ -50,10 +58,13 @@ async function generateOutline({
       top_p: 0.95,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate the full ${chapterCount} chapter outline now.` },
+        {
+          role: "user",
+          content: `Generate the full ${chapterCount}-chapter outline now.`,
+        },
       ],
     });
-  } while (attempts++ < maxRetries && banned.some(rx => rx.test(outline)));
+  } while (attempts++ < maxRetries && banned.some((rx) => rx.test(outline)));
 
   if (!outline) throw new Error("No outline returned by LLM.");
 

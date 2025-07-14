@@ -1,4 +1,4 @@
-// config/channelRegistry.js
+// src/config/channelRegistry.js
 const fs = require("fs");
 const path = require("path");
 
@@ -12,6 +12,7 @@ const registry = {
     targetScriptChars: 20_000,
     // segmentChars: 12_000,
     imagesPerChapter: 2,
+    imageSize: "1536x1024",
   },
   // bible_channel: {
   //   label: "Biblical Prophecies",
@@ -27,10 +28,15 @@ const registry = {
 
 /* ── integrity checks (throw on startup) ── */
 Object.entries(registry).forEach(([key, cfg]) => {
-  ["promptPath", "styles", "povOptions", "targetScriptChars",
-    "imagesPerChapter"].forEach(f => {
-      if (cfg[f] === undefined) throw new Error(`Channel ${key}: missing ${f}`);
-    });
+  [
+    "promptPath",
+    "styles",
+    "povOptions",
+    "targetScriptChars",
+    "imagesPerChapter",
+  ].forEach((f) => {
+    if (cfg[f] === undefined) throw new Error(`Channel ${key}: missing ${f}`);
+  });
   const folder = path.join(__dirname, "..", "prompts", cfg.promptPath);
   if (!fs.existsSync(folder))
     throw new Error(`Channel ${key}: promptPath not found → ${folder}`);

@@ -1,20 +1,14 @@
-/* ────────────────────────────────────────────────────────── *
-   src/core/script.service.js
-   Dynamic, length-driven script generation
-* ────────────────────────────────────────────────────────── */
-const fs   = require("fs");
+// src/core/script.service.js
+
+const fs = require("fs");
 const path = require("path");
 
-const cfg      = require("../config/env");
-const llm      = require("../config/llm");
-const prompts  = require("../infrastructure/promptLoader");
+const cfg = require("../config/env");
+const llm = require("../config/llm");
+const prompts = require("../infrastructure/promptLoader");
 const { ensureDir, write } = require("../infrastructure/fileStore");
 const interpolate = require("../utils/interpolate");
 
-/* ────────────────────────────────────────────────────────── *
-   SegmentedScriptWriter
-   – Generates seamless parts until targetScriptChars reached
-* ────────────────────────────────────────────────────────── */
 class SegmentedScriptWriter {
   /**
    * @param {string} outlineText
@@ -24,15 +18,17 @@ class SegmentedScriptWriter {
    */
   constructor(outlineText, runDir, plan, opts = {}) {
     if (!outlineText) throw new Error("Outline text is required.");
-    if (!runDir)      throw new Error("runDir is required.");
-    if (!plan)        throw new Error("plan.json data missing.");
+    if (!runDir) throw new Error("runDir is required.");
+    if (!plan) throw new Error("plan.json data missing.");
+    if (!plan.title) throw new Error("Plan must have a title.");
+    if (!plan.segmentChars) throw new Error("Plan must have segmentChars.");
 
-    this.plan        = plan;
-    this.runDir      = runDir;
-    this.scriptDir   = path.join(runDir, "script");
-    this.segmentIdx  = 1;
-    this.charCount   = 0;
-    this.segmentCap  = plan.chapterCount;
+    this.plan = plan;
+    this.runDir = runDir;
+    this.scriptDir = path.join(runDir, "script");
+    this.segmentIdx = 1;
+    this.charCount = 0;
+    this.chapterCount = plan.chapterCount;
 
     ensureDir(this.scriptDir);
 
@@ -43,24 +39,31 @@ class SegmentedScriptWriter {
 
     const systemPrompt = interpolate(scriptTpl, {
       OUTLINE: outlineText.trim(),
-      TITLE:   opts.title || plan.title || "",
+      TITLE: opts.title || plan.title,
+      SEGMENT_CHARS: plan.segmentChars,
     });
 
     this.history = [
       { role: "system", content: systemPrompt },
-      { role: "user",   content: "Begin the story. Keep flowing; no hard breaks." },
+      {
+        role: "user",
+        content: "Begin the story. Keep flowing; no hard breaks.",
+      },
     ];
   }
 
   /** Generate one segment, persist, update counters */
   async generateNext() {
-    if (this.segmentIdx > this.segmentCap)
+    if (this.segmentIdx > this.chapterCount)
       throw new Error("All segments generated (cap reached).");
 
     const modelName = cfg.SCRIPT_MODEL;
-    if (!modelName) throw new Error("No model configured for script generation.");
+    if (!modelName)
+      throw new Error("No model configured for script generation.");
 
-    console.log(`✍️  Segment ${this.segmentIdx} (${this.charCount} chars so far)`);
+    console.log(
+      `✍️  Segment ${this.segmentIdx} (${this.charCount} chars so far)`
+    );
 
     const response = await llm.chat({
       model: modelName,
@@ -73,7 +76,7 @@ class SegmentedScriptWriter {
     if (!response) throw new Error("Empty response from LLM.");
 
     const terminator = `--END OF PART ${this.segmentIdx}--`;
-    const content    = `${response.trim()}\n${terminator}`;
+    const content = `${response.trim()}\n${terminator}`;
 
     /* save part */
     const partName = `part-${String(this.segmentIdx).padStart(2, "0")}.txt`;
@@ -85,7 +88,7 @@ class SegmentedScriptWriter {
     fs.appendFileSync(masterPath, content + "\n\n");
 
     /* update state */
-    this.charCount  += content.length;
+    this.charCount += content.length;
     this.segmentIdx += 1;
 
     this.history.push({ role: "assistant", content: response });
@@ -98,8 +101,7 @@ class SegmentedScriptWriter {
   }
 
   done() {
-    return this.charCount >= this.plan.targetScriptChars
-        || this.segmentIdx  >  this.segmentCap;
+    return this.segmentIdx > this.chapterCount;
   }
 }
 
@@ -107,7 +109,7 @@ class SegmentedScriptWriter {
    Helper – generate the full script for a runDir
 * ────────────────────────────────────────────────────────── */
 async function writeFullScript(runDir) {
-  const planPath = path.join(runDir, "plan.json");
+  const planPath = path.join(runDir, "plan.json"); // TODO: should not read the file instead used the passed in plan object
   const outlinePath = path.join(runDir, "outline.txt");
 
   if (!fs.existsSync(planPath))
@@ -115,7 +117,7 @@ async function writeFullScript(runDir) {
   if (!fs.existsSync(outlinePath))
     throw new Error(`outline.txt not found in ${runDir}`);
 
-  const plan    = JSON.parse(fs.readFileSync(planPath, "utf-8"));
+  const plan = JSON.parse(fs.readFileSync(planPath, "utf-8"));
   const outline = fs.readFileSync(outlinePath, "utf-8");
 
   const writer = new SegmentedScriptWriter(outline, runDir, plan);
