@@ -5,6 +5,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bedtime‑History Generator</title>
+  <script defer>
+    async function populateFormOptions() {
+      const res = await fetch("/api/config");
+      const { channels } = await res.json();
+
+      const channelSelect = document.getElementById("channel");
+      const povSelect = document.getElementById("pov");
+      const styleSelect = document.getElementById("styleKey");
+
+      channels.forEach((ch) => {
+        const opt = document.createElement("option");
+        opt.value = ch.key;
+        opt.textContent = ch.label;
+        channelSelect.appendChild(opt);
+      });
+
+      channelSelect.addEventListener("change", () => {
+        const selected = channels.find(c => c.key === channelSelect.value);
+        povSelect.innerHTML = "";
+        styleSelect.innerHTML = "";
+
+        selected.povOptions.forEach(pov => {
+          const opt = document.createElement("option");
+          opt.value = pov;
+          opt.textContent = pov.replace("_", "-");
+          povSelect.appendChild(opt);
+        });
+
+        selected.styles.forEach(style => {
+          const opt = document.createElement("option");
+          opt.value = style;
+          opt.textContent = style.charAt(0).toUpperCase() + style.slice(1);
+          styleSelect.appendChild(opt);
+        });
+      });
+
+      // Trigger default channel
+      channelSelect.dispatchEvent(new Event("change"));
+    }
+
+    window.addEventListener("DOMContentLoaded", populateFormOptions);
+  </script>
+
+
   <script defer src="/main.js"></script>
   <style>
     body {
@@ -53,23 +97,16 @@
       <input name="title" required placeholder="e.g. Mid-Winter Troll Taxes" />
     </label>
 
-    <label>Mood
-      <input name="mood" placeholder="leave blank to auto-pick" />
+    <label>Channel
+      <select name="channel" id="channel" required></select>
     </label>
 
     <label>POV
-      <select name="pov">
-        <option value="second_person" selected>Second-person</option>
-        <option value="first_person">First-person</option>
-      </select>
+      <select name="pov" id="pov"></select>
     </label>
 
     <label>Image style
-      <select name="styleKey">
-        <option value="tapestry" selected>Tapestry</option>
-        <option value="bible">Bible</option>
-        <option value="etching">Etching</option>
-      </select>
+      <select name="styleKey" id="styleKey"></select>
     </label>
 
     <button type="submit">Generate</button>

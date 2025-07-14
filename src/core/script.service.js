@@ -1,57 +1,68 @@
-// src/core/script.service.js
+/* ────────────────────────────────────────────────────────── *
+   src/core/script.service.js
+   Dynamic, length-driven script generation
+* ────────────────────────────────────────────────────────── */
+const fs   = require("fs");
 const path = require("path");
-const fs = require("fs");
-const cfg = require("../config/env");
-const llm = require("../config/llm");
-const prompts = require("../infrastructure/promptLoader");
+
+const cfg      = require("../config/env");
+const llm      = require("../config/llm");
+const prompts  = require("../infrastructure/promptLoader");
 const { ensureDir, write } = require("../infrastructure/fileStore");
 const interpolate = require("../utils/interpolate");
 
 /* ────────────────────────────────────────────────────────── *
-   ScriptWriterSession
-   – Streams N chapters sequentially, persists each under runDir/script/
+   SegmentedScriptWriter
+   – Generates seamless parts until targetScriptChars reached
 * ────────────────────────────────────────────────────────── */
-class ScriptWriterSession {
+class SegmentedScriptWriter {
   /**
-   * @param {string} outlineText         Raw outline text
-   * @param {string} runDir              Job directory created by outline service
-   * @param {object} [opts]              { title?: string }
+   * @param {string} outlineText
+   * @param {string} runDir         Job directory with plan.json
+   * @param {object} plan           Parsed plan.json
+   * @param {object} [opts]         { title?: string }
    */
-  constructor(outlineText, runDir, opts = {}) {
+  constructor(outlineText, runDir, plan, opts = {}) {
     if (!outlineText) throw new Error("Outline text is required.");
-    if (!runDir) throw new Error("runDir is required.");
+    if (!runDir)      throw new Error("runDir is required.");
+    if (!plan)        throw new Error("plan.json data missing.");
 
-    this.runDir = runDir;
-    this.scriptDir = path.join(runDir, "script");
-    this.chapter = 1;
+    this.plan        = plan;
+    this.runDir      = runDir;
+    this.scriptDir   = path.join(runDir, "script");
+    this.segmentIdx  = 1;
+    this.charCount   = 0;
+    this.segmentCap  = Math.ceil(plan.targetScriptChars / plan.segmentChars);
 
-    /* create /script folder inside the run */
     ensureDir(this.scriptDir);
 
-    /* fill placeholders in prompts/script.txt */
-    const systemPrompt = interpolate(prompts.load("script"), {
+    /* Load channel-specific prompt */
+    const scriptTpl = prompts.loadRaw(
+      path.join(__dirname, "..", "prompts", plan.promptPath, "script.txt")
+    );
+
+    const systemPrompt = interpolate(scriptTpl, {
       OUTLINE: outlineText.trim(),
-      TITLE: opts.title || "",
+      TITLE:   opts.title || plan.title || "",
     });
 
     this.history = [
       { role: "system", content: systemPrompt },
-      { role: "user", content: "Start with Chapter 1." },
+      { role: "user",   content: "Begin the story. Keep flowing; no hard breaks." },
     ];
   }
 
-  /** Generate the current chapter, persist to /script, then advance pointer */
+  /** Generate one segment, persist, update counters */
   async generateNext() {
-    if (this.chapter > cfg.SCRIPT_CHAPTER_COUNT)
-      throw new Error("All chapters generated.");
+    if (this.segmentIdx > this.segmentCap)
+      throw new Error("All segments generated (cap reached).");
 
     const modelName = cfg.SCRIPT_MODEL;
-    if (!modelName) {
-      throw new Error("No model configured for script generation.");
-    }
-    console.log(`✍️  Generating Chapter ${this.chapter} using ${modelName}`);
+    if (!modelName) throw new Error("No model configured for script generation.");
 
-    const content = await llm.chat({
+    console.log(`✍️  Segment ${this.segmentIdx} (${this.charCount} chars so far)`);
+
+    const response = await llm.chat({
       model: modelName,
       temperature: 0.8,
       top_p: 0.95,
@@ -59,26 +70,64 @@ class ScriptWriterSession {
       messages: this.history,
     });
 
-    if (!content || !content.includes("--END OF CHAPTER"))
-      throw new Error("Chapter content missing terminator.");
+    if (!response) throw new Error("Empty response from LLM.");
 
-    const fileName = `chapter-${String(this.chapter).padStart(2, "0")}.txt`;
-    const filePath = path.join(this.scriptDir, fileName);
-    write(filePath, content);
+    const terminator = `--END OF PART ${this.segmentIdx}--`;
+    const content    = `${response.trim()}\n${terminator}`;
 
-    // Append to master file with only a line break
-    const masterFilePath = path.join(this.scriptDir, "all-chapters.txt");
-    fs.appendFileSync(masterFilePath, content + "\n\n");
+    /* save part */
+    const partName = `part-${String(this.segmentIdx).padStart(2, "0")}.txt`;
+    const partPath = path.join(this.scriptDir, partName);
+    write(partPath, content);
 
-    this.history.push({ role: "assistant", content });
-    this.history.push({ role: "user", content: "Next" });
-    this.chapter += 1;
-    return content;
+    /* append to master script */
+    const masterPath = path.join(this.scriptDir, "full-script.txt");
+    fs.appendFileSync(masterPath, content + "\n\n");
+
+    /* update state */
+    this.charCount  += content.length;
+    this.segmentIdx += 1;
+
+    this.history.push({ role: "assistant", content: response });
+    this.history.push({ role: "user", content: "Continue seamlessly." });
+
+    return {
+      segment: this.segmentIdx - 1,
+      totalChars: this.charCount,
+    };
   }
 
-  chaptersRemaining() {
-    return cfg.SCRIPT_CHAPTER_COUNT - this.chapter + 1;
+  done() {
+    return this.charCount >= this.plan.targetScriptChars
+        || this.segmentIdx  >  this.segmentCap;
   }
 }
 
-module.exports = { ScriptWriterSession };
+/* ────────────────────────────────────────────────────────── *
+   Helper – generate the full script for a runDir
+* ────────────────────────────────────────────────────────── */
+async function writeFullScript(runDir) {
+  const planPath = path.join(runDir, "plan.json");
+  const outlinePath = path.join(runDir, "outline.txt");
+
+  if (!fs.existsSync(planPath))
+    throw new Error(`plan.json not found in ${runDir}`);
+  if (!fs.existsSync(outlinePath))
+    throw new Error(`outline.txt not found in ${runDir}`);
+
+  const plan    = JSON.parse(fs.readFileSync(planPath, "utf-8"));
+  const outline = fs.readFileSync(outlinePath, "utf-8");
+
+  const writer = new SegmentedScriptWriter(outline, runDir, plan);
+  while (!writer.done()) {
+    await writer.generateNext();
+  }
+
+  return {
+    charsWritten: writer.charCount,
+    segments: writer.segmentIdx - 1,
+    scriptFile: "script/full-script.txt",
+  };
+}
+
+module.exports = { writeFullScript, SegmentedScriptWriter };

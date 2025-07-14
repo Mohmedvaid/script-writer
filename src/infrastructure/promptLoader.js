@@ -27,4 +27,19 @@ function loadStyle(key = "default") {
   return load(`image_styles/${key}.txt`);
 }
 
-module.exports = { load, loadStyle };
+function loadRaw(absOrRel) {
+  const baseDir = path.join(__dirname, "..", "prompts");
+  const full    = path.isAbsolute(absOrRel)
+    ? absOrRel
+    : path.join(baseDir, absOrRel);
+
+  if (!fs.existsSync(full))
+    throw new Error(`🧐 Missing prompt template: ${full}`);
+
+  if (cache.has(full)) return cache.get(full);
+  const txt = fs.readFileSync(full, "utf-8");
+  cache.set(full, txt);
+  return txt;
+}
+
+module.exports = { load, loadStyle, loadRaw };

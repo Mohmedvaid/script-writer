@@ -11,6 +11,8 @@ const asyncMW = require("./web/middlewares/async");
 const outlineRoutes = require("./web/routes/outline.routes");
 const scriptRoutes = require("./web/routes/script.routes");
 const imageRoutes = require("./web/routes/image.routes");
+const configRoutes = require("./web/routes/config.routes");
+const createRoutes = require("./web/routes/create.routes");
 
 // ── create app
 const app = express();
@@ -31,9 +33,11 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.get("/", (_req, res) => res.render("index", { title: "" }));
 
 //TODO:  not sure if this right spot for this
-app.use("/api", outlineRoutes);
-app.use("/api", scriptRoutes);
-app.use("/api", imageRoutes);
+// app.use("/api", outlineRoutes);
+// app.use("/api", scriptRoutes);
+// app.use("/api", imageRoutes);
+app.use("/api", configRoutes);
+app.use("/api", createRoutes);
 
 // ── last: error handler
 app.use(errorMW);
