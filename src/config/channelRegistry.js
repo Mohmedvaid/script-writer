@@ -20,8 +20,8 @@ const registry = {
     promptPath: "bible_channel",
     styles: ["bible"],
     povOptions: ["third_person", "first_person"],
-    targetScriptChars: 15_000,
-    imagesPerChapter: 10,
+    targetScriptChars: 10_000,
+    imagesPerChapter: 2,
     imageSize: "1536x1024",
   },
 };

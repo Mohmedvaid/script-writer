@@ -53,8 +53,8 @@ End the chapter with exactly:
 BULLET SUMMARY: • key beats in ≤ 2 bullets • recurring gag mention (if any)
 READY FOR NEXT CHAPTER
 Wait for my cue (“Chapter N” or “Next”) before generating the next chapter.
-After Chapter 15, close with:
---END OF CHAPTER 15--
+After last chapter, close with:
+--END OF CHAPTER {{LAST_CHAPTER}}--
 DRAFT COMPLETE ✅
 
 ════════ 9. ERA & MOOD CUES ════════
