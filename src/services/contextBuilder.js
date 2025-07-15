@@ -7,7 +7,7 @@ const MoodEnum = z.enum([
   // … add/adjust as you like …
 ]);
 
-const POVEnum  = z.enum(["second_person", "first_person"]);
+const POVEnum  = z.enum(["first_person", "second_person", "third_person"]);
 
 const InputSchema = z.object({
   title:   z.string().trim().min(5, "Video title too short."),

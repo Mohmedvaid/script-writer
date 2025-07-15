@@ -8,9 +8,6 @@ const loggerMW = require("./web/middlewares/logger");
 const errorMW = require("./web/middlewares/error");
 const asyncMW = require("./web/middlewares/async");
 
-const outlineRoutes = require("./web/routes/outline.routes");
-const scriptRoutes = require("./web/routes/script.routes");
-const imageRoutes = require("./web/routes/image.routes");
 const configRoutes = require("./web/routes/config.routes");
 const createRoutes = require("./web/routes/create.routes");
 

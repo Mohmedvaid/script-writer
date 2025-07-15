@@ -3,15 +3,19 @@
 Medium & Era  
 • High-detail late-Renaissance oil painting on linen canvas, muted varnish patina.
 
+Subject  
+• Place {{AVATAR_SNIPPET}} at the compositional focus, supported by any other biblical figures, symbols, or objects named above, forming a reverent tableau that visually teaches the verse or theme.
+
 Visual Style  
 • Rich but restrained chiaroscuro for gentle depth.  
-• Graceful drapery and composed figures in traditional garments.  
+• Naturalistic anatomy and drapery; subtle halo glow on holy figures.  
 • Palette: deep ultramarine, earthy umber, crimson lake, pale gold highlights.  
-• Soft atmospheric haze to evoke celestial awe, without modern artifacts.  
-• Facial expressions serene, reflective, or observant; strictly PG-rated.
+• Soft atmospheric haze to evoke divine presence, without modern artifacts.  
+• Horizontal 16 : 9 format, uncluttered negative space to keep the eye restful.  
+• Facial expressions peaceful, awe-filled, or contemplative; strictly PG-13.
 
 Lighting  
-• Diffuse, warm candlelight with faint ambient rim-light—no stark spotlights.
+• Diffuse, warm candlelight with faint heavenly rim-light—no stark spotlights.
 
 Output  
 • One finished frame that looks freshly photographed from a museum-quality masterwork—no borders, captions, or UI elements.

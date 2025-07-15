@@ -14,16 +14,16 @@ const registry = {
     imagesPerChapter: 2,
     imageSize: "1536x1024",
   },
-  // bible_channel: {
-  //   label: "Biblical Prophecies",
-  //   avatarRequired: false,
-  //   promptPath: "bible_channel",
-  //   styles: ["bible", "sky", "scrollwork"],
-  //   povOptions: ["third_person", "first_person"],
-  //   targetScriptChars: 45_000,
-  //   segmentChars: 10_000,
-  //   imagesPerChapter: 1,
-  // },
+  bible_channel: {
+    label: "Biblical Prophecies",
+    avatarRequired: true,
+    promptPath: "bible_channel",
+    styles: ["bible"],
+    povOptions: ["third_person", "first_person"],
+    targetScriptChars: 15_000,
+    imagesPerChapter: 10,
+    imageSize: "1536x1024",
+  },
 };
 
 /* ── integrity checks (throw on startup) ── */

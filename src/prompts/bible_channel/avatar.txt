@@ -1,0 +1,20 @@
+You are designing the single recurring avatar for a gripping Bible‑history video.
+
+INPUT OUTLINE  
+{{OUTLINE}}
+
+TASK  
+• From the outline’s era and spiritual cues, craft one concise human avatar spec (4‑6 lines) that will intrigue viewers and remain visually memorable across chapters.
+
+FORMAT — MUST MATCH EXACTLY (no extra lines, bullets, or markdown):
+
+Name – short, era‑appropriate nickname (e.g., “Eli”, “Mara”, “Abba Joel”)  
+Look – garb true to {{SETTING}} (earth‑tone linen, leather sandals, practical layers) and average build / height  
+Face – warm, weather‑worn features; steady, inquisitive gaze; neatly trimmed beard if male  
+Props – one humble yet instantly recognisable symbol (scroll, shepherd’s staff, clay oil lamp) always included  
+Palette – ochre, deep indigo, burnished copper for continuity
+
+RULES  
+• Keep it PG‑13; no romantic or graphic details.  
+• Zero modern references or slang.  
+• Return nothing except the formatted avatar spec.
